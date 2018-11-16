@@ -9,7 +9,7 @@
 ;; - Run test interactively
 
 (defgroup gtest nil
-  "gtest group"	
+  "gtest group"
   :group 'tools)
 
 
@@ -18,23 +18,33 @@
   :group 'tools'
   :type 'string)
 
-(defun gtest-list ()
+(defvar gtest-current-target nil)
+(defvar gtest-target-history nil)
+
+(defun gtest-read-target-name ()
+  "Read name of gtest executable to execute"
+  (let ((file-name (read-file-name "gtest executable: " default-directory gtest-current-target)))
+    (setq gtest-current-target file-name)
+    file-name))
+
+(defun gtest-list (test-target)
   "List all the tests"
-  (interactive)
-  (shell-command (concat gtest-target " --gtest_list_tests" "&")))
+  (interactive (list (gtest-read-target-name)))
+  (shell-command (concat test-target " --gtest_list_tests" "&")))
 
-(defun gtest-run-all ()
+(defun gtest-run-all (test-target)
   "run all the tests"
-  (interactive)
-  (shell-command (concat gtest-target "&")))
+  (interactive (list (gtest-read-target-name)))
+  (shell-command (concat test-target "&")))
 
-(defun gtest-run (filter)
+(defun gtest-run (test-target filter)
   "Run gtest as per filter"
   (interactive (list
-		(read-string
-		 (format "filter (%s): "
-			 (concat "*" (thing-at-point 'symbol) "*"))
-			     nil nil (concat"*" (thing-at-point 'symbol) "*"))))
+                (gtest-read-target-name)
+                (read-string
+                 (format "filter (%s): "
+                         (concat "*" (thing-at-point 'symbol) "*"))
+                             nil nil (concat"*" (thing-at-point 'symbol) "*"))))
   (shell-command (concat gtest-target " --gtest_filter=" filter "&")))
 
 (defun is-line-at-point-is-test-hierarchy-or-fixture ()
@@ -63,17 +73,17 @@
        "[)]"
        ""
        (replace-regexp-in-string
-	"TEST.*[(]"
-	""
-	test))))))
-  
+        "TEST.*[(]"
+        ""
+        test))))))
+
 
 (defun search-test-at-point-in-source-file ()
   "search test from the source"
   (interactive)
   (parse-test))
 
-  
+
 (defun search-test-at-point ()
   "search test at pointsearch test at point"
   (interactive)
@@ -103,4 +113,4 @@
 	    (define-key map (kbd "C-M-t") 'gtest-run)
 	    map))
 (provide 'gtest-mode)
-	    
+
