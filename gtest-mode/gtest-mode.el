@@ -23,9 +23,15 @@
 
 (defun gtest-read-target-name ()
   "Read name of gtest executable to execute"
-  (let ((file-name (read-file-name "gtest executable: " default-directory gtest-current-target)))
+  (let* ((start-dir (if gtest-current-target
+                        (file-name-directory gtest-current-target)
+                      default-directory))
+         (start-filename (if gtest-current-target
+                             (file-name-nondirectory gtest-current-target)
+                           ""))
+         (file-name (read-file-name "gtest executable: " start-dir nil nil start-filename)))
     (setq gtest-current-target file-name)
-    file-name))
+    (file-local-name file-name)))
 
 (defun gtest-list (test-target)
   "List all the tests"
@@ -45,7 +51,7 @@
                  (format "filter (%s): "
                          (concat "*" (thing-at-point 'symbol) "*"))
                              nil nil (concat"*" (thing-at-point 'symbol) "*"))))
-  (shell-command (concat gtest-target " --gtest_filter=" filter "&")))
+  (shell-command (concat test-target " --gtest_filter=" filter "&")))
 
 (defun is-line-at-point-is-test-hierarchy-or-fixture ()
   ""
